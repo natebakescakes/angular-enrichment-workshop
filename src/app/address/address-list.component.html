@@ -1,3 +1,1 @@
-<div *ngFor="let a of addressList">
-  <app-address-card [address]="a" (removeAddress)="remove($event)"></app-address-card>
-</div>
+<app-address-card *ngFor="let a of addressList" [address]="a" (removeAddress)="remove($event)"></app-address-card>
