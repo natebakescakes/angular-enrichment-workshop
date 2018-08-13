@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { IAddress } from './address';
+import { AddressService } from '../services/address.service';
 
 @Component({
   selector: 'app-address-form',
@@ -13,19 +14,40 @@ export class AddressFormComponent implements OnInit {
 
   addressList: IAddress[] = [];
 
-  constructor() {}
+  constructor(private addressService: AddressService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.addressService
+      .loadAddresses()
+      .then((addressList: IAddress[]) => {
+        console.log('Addresses from database: ', addressList);
+        this.addressList = addressList;
+      })
+      .catch(err => {
+        console.error('Error: ', err);
+      });
+  }
 
   addAddress() {
-    this.addressList.push(this.addressForm.value);
-    this.addressForm.resetForm();
+    // Promise - non-blocking, async
+    this.addressService.saveAddress(this.addressForm.value).then(result => {
+      console.log('saveAddress status: ', result);
+      if (result.status) {
+        this.addressList.push(this.addressForm.value);
+        this.addressForm.resetForm();
+      }
+    });
   }
 
   removeAddress(address: IAddress) {
-    this.addressList.splice(
-      this.addressList.findIndex(x => x.name === address.name),
-      1,
-    );
+    this.addressService.deleteAddress(address).then(result => {
+      console.log('deleteAddress status: ', result);
+      if (result.status) {
+        this.addressList.splice(
+          this.addressList.findIndex(x => x.name === address.name),
+          1,
+        );
+      }
+    });
   }
 }
